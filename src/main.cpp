@@ -12,39 +12,42 @@
 int main(int argc, char* argv[])
 {
 	// read program parameters
-	//TODO
+	// TODO
 
-	// create .tasklist directory if not found
+	// get ~/.tasklist string
 	char* homedir = getenv("HOME");
-	if (homedir == nullptr)
-		homedir = getpwuid(getuid())->pw_dir;
+	if (homedir == nullptr) // if env var is unset
+		homedir = getpwuid(getuid())->pw_dir; // get dynamic info
 	strcat(homedir, "/.tasklist");
 
+	// open ~/.tasklist directory
 	DIR* dir = opendir(homedir);
-	if (dir == nullptr)
+	if (dir == nullptr) // if not found
 	{
-		if (mkdir(homedir, 0755) == 0)
-			dir = opendir(homedir);
+		if (mkdir(homedir, 0755) == 0) // try to create it
+			dir = opendir(homedir); // open again
 
-		if (dir == nullptr)
+		if (dir == nullptr) // if failed, quit
 		{
 			std::cerr << "Unable to open or create " << homedir << std::endl;
 			return -1;
 		}
 	}
 
-	// initialize ncurses if needed
-	initscr();
-	
+	// initialize ncurses
+	initscr(); // create console window
+	raw(); // disable line buffering and controls
+	noecho(); // disable user input echoing
+	keypad(stdscr, true); // enable function keys and arrows
+
 	while (struct dirent* dir_info = readdir(dir)) // foreach file in ~/.tasklist
 	{
 		if (dir_info->d_type == DT_REG) // if it's a regular file
 			printw("%s\n", dir_info->d_name); // print its name
 	}
-	refresh();
+	refresh(); // update screen display
 
-	// close ncurses
-
+	// close directory and ncurses
 	closedir(dir);
 	getch();
 	endwin();
