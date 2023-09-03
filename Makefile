@@ -1,4 +1,4 @@
-CC = g++
+CC = gcc
 EXEC = tl
 FLAGS = -Wall -Werror -pedantic
 LIBS = -lncurses
@@ -22,4 +22,4 @@ bin/$(EXEC): obj/main.o
 	$(CC) obj/*.o -o bin/$(EXEC) $(LIBS)
 
 obj/main.o:
-	$(CC) src/main.cpp -c -o obj/main.o $(FLAGS)
+	$(CC) src/main.c -c -o obj/main.o $(FLAGS)
