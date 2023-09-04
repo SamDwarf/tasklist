@@ -10,7 +10,10 @@
 #include <dirent.h>
 #include <pwd.h>
 
-char *tl_path() // returns "~/.tasklist" string
+#define DELIMITER '#'
+#define TITLE "Task List"
+
+char *tl_path() // returns ~/.tasklist string
 {
 	char *path = getenv("HOME");
 	if (path == NULL) // if environment var is unset
@@ -38,6 +41,15 @@ DIR *open_or_create(const char* path)
 	return dir;
 }
 
+void fill_line(int row, char c)
+{
+	int col = getmaxx(stdscr);
+	move(row, 0);
+
+	for (int i = 0; i < col; ++i)
+		addch(c);
+}
+
 void init_screen()
 {
 	// init ncurses
@@ -46,8 +58,18 @@ void init_screen()
 	noecho(); // disable user input echoing
 	keypad(stdscr, TRUE); // enable function keys and arrows
 	
-	// print title and help
-	// TODO
+	// print title
+	fill_line(0, DELIMITER);
+	int col = getmaxx(stdscr);
+	move(0, (col - strlen(TITLE) - 2) / 2); // middle of first row
+	printw(" %s ", TITLE);
+
+	// print commands
+	int row = getmaxy(stdscr);
+	fill_line(row - 6, DELIMITER); // let five rows underneath
+
+	// set cursor
+	move(2, 0);
 }
 
 int main(int argc, char *argv[])
@@ -57,6 +79,8 @@ int main(int argc, char *argv[])
 
 	DIR *tl_dir = open_or_create(tl_path()); // get tasklist home directory
 	init_screen();
+
+	// TODO check_list
  
 	// display lists
 	struct dirent *entry = NULL;
@@ -65,6 +89,7 @@ int main(int argc, char *argv[])
 		if (entry->d_type == DT_REG) // if it's a regular file
 			printw("%s\n", entry->d_name); // print its name
 	}
+	// TODO add them in a container, and sort them + remember sort (just edit one file with this list ?)
 
 	refresh(); // update screen display
 	getch(); // wait for entry
